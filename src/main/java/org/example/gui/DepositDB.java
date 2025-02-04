@@ -1,4 +1,4 @@
-package org.example.model;
+package org.example.gui;
 
 import org.example.database.DBManager;
 import java.sql.*;
@@ -9,7 +9,7 @@ public class DepositDB {
 
     public static void saveDeposit(String depositorName, double amount, int branchId) {
         if (!doesBranchExist(branchId)) {
-            System.out.println("❌ Error: Branch with ID " + branchId + " does not exist!");
+            System.out.println("Error: Branch with ID " + branchId + " does not exist!");
             return;
         }
         try (Connection conn = DBManager.getConnection();
@@ -19,45 +19,7 @@ public class DepositDB {
             stmt.setDouble(2, amount);
             stmt.setInt(3, branchId);
             stmt.executeUpdate();
-            System.out.println("✅ Deposit added: " + depositorName + " - " + amount);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static List<String[]> getDepositsByBranch(int branchId) {
-        List<String[]> deposits = new ArrayList<>();
-        String query = "SELECT id, depositor_name, amount FROM deposits WHERE branch_id = ?";
-        try (Connection conn = DBManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, branchId);
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                deposits.add(new String[]{
-                        String.valueOf(rs.getInt("id")),
-                        rs.getString("depositor_name"),
-                        String.valueOf(rs.getDouble("amount"))
-                });
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return deposits;
-    }
-
-
-    public static void replenishDeposit(int depositId, double amount) {
-        String query = "UPDATE deposits SET amount = amount + ? WHERE id = ?";
-        try (Connection conn = DBManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setDouble(1, amount);
-            stmt.setInt(2, depositId);
-            int rowsUpdated = stmt.executeUpdate();
-            if (rowsUpdated > 0) {
-                System.out.println("✅ Депозит ID " + depositId + " пополнен на " + amount);
-            } else {
-                System.out.println("❌ Ошибка: Депозит с ID " + depositId + " не найден!");
-            }
+            System.out.println("Deposit added: " + depositorName + " - " + amount);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -111,18 +73,22 @@ public class DepositDB {
         return false;
     }
 
-    public static void updateDeposit(int depositId, double amount) {
-        String query = "UPDATE deposits SET amount = ? WHERE id = ?";
+    public static void replenishAccount(int depositId, double amount) {
+        String query = "UPDATE deposits SET amount = amount + ? WHERE id = ?";
+
         try (Connection conn = DBManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
+
             stmt.setDouble(1, amount);
             stmt.setInt(2, depositId);
             stmt.executeUpdate();
-            System.out.println("✅ Deposit updated.");
+            System.out.println("Account has been replenished by --> " + amount);
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
 
     public static void deleteDeposit(int depositId) {
         String query = "DELETE FROM deposits WHERE id = ?";
@@ -130,7 +96,7 @@ public class DepositDB {
              PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, depositId);
             stmt.executeUpdate();
-            System.out.println("🗑 Deposit deleted.");
+            System.out.println("Deposit deleted.");
         } catch (SQLException e) {
             e.printStackTrace();
         }

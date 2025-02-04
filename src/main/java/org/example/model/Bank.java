@@ -13,7 +13,7 @@ public class Bank {
     }
 
     public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public void setName(String name) { this.name = name; } //сеттеры и геттеры
     public List<Branch> getBranches() { return branches; }
 
     public void addBranch(Branch branch) {
@@ -21,13 +21,15 @@ public class Bank {
     }
 
     public Deposit findDepositByDepositor(String depositorName) {
-        for (Branch branch : branches) {
-            for (Deposit deposit : branch.getDeposits()) {
+        for (int i = 0; i < branches.size(); i++) {
+            Branch branch = branches.get(i);
+            for (int j = 0; j < branch.getDeposits().size(); j++) {
+                Deposit deposit = branch.getDeposits().get(j);
                 if (deposit.getDepositorName().equalsIgnoreCase(depositorName)) {
                     return deposit;
                 }
             }
         }
-        return null;
+        return null; 
     }
 }

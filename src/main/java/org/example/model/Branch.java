@@ -20,6 +20,7 @@ public class Branch {
     public Bank getBank() { return bank; }
     public List<Deposit> getDeposits() { return deposits; }
 
+
     public void addDeposit(Deposit deposit) {
         deposits.add(deposit);
     }

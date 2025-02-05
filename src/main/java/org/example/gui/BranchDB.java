@@ -18,4 +18,33 @@ public class BranchDB {
         }
     }
 
+    public static String[] getAllBranches() {
+        List<String> branches = new ArrayList<>();
+        String query = "SELECT name FROM branches";
+        try (Connection conn = DBManager.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+            while (rs.next()) {
+                branches.add(rs.getString("name"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return branches.toArray(new String[0]); // Конвертация списка в массив
+    }
+
+    public static int getBranchIdByName(String branchName) {
+        String query = "SELECT id FROM branches WHERE name = ?";
+        try (Connection conn = DBManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, branchName);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1; // Если филиал не найден
+    }
 }

@@ -14,7 +14,7 @@ public class BankGUI {
     public BankGUI() {
         frame = new JFrame("Bank Manager");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(600, 400);
+        frame.setSize(700, 400);
         frame.setLayout(new BorderLayout());
 
         // Search Bar
@@ -26,12 +26,13 @@ public class BankGUI {
         searchPanel.add(searchButton);
         frame.add(searchPanel, BorderLayout.NORTH);
 
-        // Table
-        tableModel = new DefaultTableModel(new String[]{"Bank ID", "Depositor Name", "Amount", "Branch"}, 0);
+        // Table with corrected columns
+        tableModel = new DefaultTableModel(new String[]{"Bank ID","Bank Name", "Branch ID", "Branch Name","Depositor ID","Depositor Name", "Amount",}, 0);
+
         table = new JTable(tableModel);
         frame.add(new JScrollPane(table), BorderLayout.CENTER);
 
-        // Buttons
+
         JPanel buttonPanel = new JPanel();
         JButton addBankBtn = new JButton("Add Bank");
         JButton addBranchBtn = new JButton("Add Branch");
@@ -60,12 +61,15 @@ public class BankGUI {
 
     private void loadDeposits() {
         tableModel.setRowCount(0);
-        List<String[]> deposits = DepositDB.getAllDeposits();
-        for (String[] deposit : deposits) {
-            tableModel.addRow(deposit);
+        List<String[]> deposits = DepositDB.getAllDepositsWithDetails();
+        if (deposits.isEmpty()) {
+            tableModel.addRow(new String[]{"NULL", "NULL", "NULL", "NULL", "NULL", "NULL"});
+        } else {
+            for (String[] deposit : deposits) {
+                tableModel.addRow(deposit);
+            }
         }
     }
-
 
     private void searchDeposit() {
         String depositor = searchField.getText().trim();
@@ -84,22 +88,54 @@ public class BankGUI {
         if (name != null && !name.isEmpty()) {
             BankDB.saveBank(name);
             JOptionPane.showMessageDialog(frame, "Bank added: " + name);
+            loadDeposits();
         }
     }
 
     private void addBranch() {
+        String[] banks = BankDB.getAllBanks();
+        if (banks.length == 0) {
+            JOptionPane.showMessageDialog(frame, "No banks available!");
+            return;
+        }
+        String bankName = (String) JOptionPane.showInputDialog(frame, "Select bank:", "Choose Bank",
+                JOptionPane.QUESTION_MESSAGE, null, banks, banks[0]);
+
+        int bankId = BankDB.getBankIdByName(bankName);
+
         String name = JOptionPane.showInputDialog(frame, "Enter branch name:");
-        int bankId = Integer.parseInt(JOptionPane.showInputDialog(frame, "Enter bank ID:"));
         if (name != null && !name.isEmpty()) {
             BranchDB.saveBranch(name, bankId);
             JOptionPane.showMessageDialog(frame, "Branch added: " + name);
+            loadDeposits();
         }
     }
 
     private void addDeposit() {
+        String[] branches = BranchDB.getAllBranches();
+        if (branches.length == 0) {
+            JOptionPane.showMessageDialog(frame, "No branches available!");
+            return;
+        }
+        String branchName = (String) JOptionPane.showInputDialog(frame, "Select branch:", "Choose Branch",
+                JOptionPane.QUESTION_MESSAGE, null, branches, branches[0]);
+
+        int branchId = BranchDB.getBranchIdByName(branchName);
+
+        if (branchId == -1) {
+            JOptionPane.showMessageDialog(frame, "Branch not found!");
+            return;
+        }
+
         String depositor = JOptionPane.showInputDialog(frame, "Enter depositor name:");
-        double amount = Double.parseDouble(JOptionPane.showInputDialog(frame, "Enter deposit amount:"));
-        int branchId = Integer.parseInt(JOptionPane.showInputDialog(frame, "Enter branch ID:"));
+        double amount;
+        try {
+            amount = Double.parseDouble(JOptionPane.showInputDialog(frame, "Enter deposit amount:"));
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(frame, "Invalid amount!");
+            return;
+        }
+
         if (depositor != null && !depositor.isEmpty()) {
             DepositDB.saveDeposit(depositor, amount, branchId);
             JOptionPane.showMessageDialog(frame, "Deposit added: " + depositor);
@@ -108,15 +144,36 @@ public class BankGUI {
     }
 
     private void editDeposit() {
-        int id = Integer.parseInt(JOptionPane.showInputDialog(frame, "Enter deposit ID:"));
-        double amount = Double.parseDouble(JOptionPane.showInputDialog(frame, "Enter amount:"));
+        int id;
+        try {
+            id = Integer.parseInt(JOptionPane.showInputDialog(frame, "Enter deposit ID:"));
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(frame, "Invalid deposit ID!");
+            return;
+        }
+
+        double amount;
+        try {
+            amount = Double.parseDouble(JOptionPane.showInputDialog(frame, "Enter amount:"));
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(frame, "Invalid amount!");
+            return;
+        }
+
         DepositDB.replenishAccount(id, amount);
         JOptionPane.showMessageDialog(frame, "Deposit updated.");
         loadDeposits();
     }
 
     private void deleteDeposit() {
-        int id = Integer.parseInt(JOptionPane.showInputDialog(frame, "Enter deposit ID:"));
+        int id;
+        try {
+            id = Integer.parseInt(JOptionPane.showInputDialog(frame, "Enter deposit ID:"));
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(frame, "Invalid deposit ID!");
+            return;
+        }
+
         DepositDB.deleteDeposit(id);
         JOptionPane.showMessageDialog(frame, "Deposit deleted.");
         loadDeposits();

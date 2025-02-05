@@ -3,6 +3,7 @@ package org.example.model;
 public class Deposit {
     private String depositorName;
     private double amount;
+
     private Branch branch;
 
 

@@ -1,8 +1,4 @@
-package org.example.service;
-
-import org.example.model.Bank;
-import org.example.model.Branch;
-import org.example.model.Deposit;
+package org.example.model;
 
 public class Main {
     public static void main(String[] args) {

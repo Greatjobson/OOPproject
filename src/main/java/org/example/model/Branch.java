@@ -6,7 +6,7 @@ import java.util.List;
 public class Branch {
     private String name;
     private Bank bank;
-    private List<Deposit> deposits;
+    private ArrayList<Deposit> deposits;
 
     public Branch(String name, Bank bank) {
         this.name = name;

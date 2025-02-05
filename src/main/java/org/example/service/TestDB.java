@@ -1,5 +1,5 @@
 
-package org.example;
+package org.example.service;
 
 import org.example.database.DBManager;
 
